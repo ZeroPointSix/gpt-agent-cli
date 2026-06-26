@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>gpt-agent</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <h1>gpt-agent</h1>
+    <p class="lead">双界面：面向 agent 的参数化触发，与面向人类的配置选型（参考 mpt-bench 向导式流程）。</p>
+    <nav class="cards">
+      <a class="card" href="/agent.html">
+        <h2>Agent 触发</h2>
+        <p>选择 agent、填写 input / conversation_key，调用 Workspace Agents API 入队。</p>
+      </a>
+      <a class="card" href="/setup.html">
+        <h2>人类配置</h2>
+        <p>逐步配置 agents.yaml：全局、默认 agent、增删改、保存与 doctor。</p>
+      </a>
+    </nav>
+    <p class="meta"><a href="/api/health">API 健康检查</a> · CLI: <code>gpt-agent ui invoke</code> / <code>gpt-agent ui setup</code></p>
+  </main>
+</body>
+</html>

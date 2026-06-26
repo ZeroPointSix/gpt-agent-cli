@@ -1,0 +1,13 @@
+# Copy to agents.yaml or ~/.config/gpt-agent/agents.yaml
+token_env: GPT_AGENT_ACCESS_TOKEN
+default: escalation
+base_url: https://api.chatgpt.com
+
+agents:
+  escalation:
+    id: agtch_complaints_123
+    description: Triage customer escalations
+  research:
+    id: agtch_research_456
+    description: Deep research agent
+    token_env: GPT_AGENT_RESEARCH_TOKEN

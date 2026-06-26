@@ -1,0 +1,73 @@
+:root {
+  --bg: #0f1419;
+  --panel: #1a2332;
+  --text: #e7ecf3;
+  --muted: #8b9cb3;
+  --accent: #3d8bfd;
+  --accent2: #5eead4;
+  --border: #2a3548;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+.shell { max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem; }
+h1 { font-size: 1.75rem; margin: 0 0 0.5rem; }
+.lead { color: var(--muted); margin-bottom: 2rem; }
+.cards { display: grid; gap: 1rem; }
+.card {
+  display: block;
+  padding: 1.25rem 1.5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s;
+}
+.card:hover { border-color: var(--accent); }
+.card h2 { margin: 0 0 0.35rem; font-size: 1.1rem; color: var(--accent2); }
+.card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.meta { margin-top: 2rem; font-size: 0.85rem; color: var(--muted); }
+code { background: var(--panel); padding: 0.15rem 0.4rem; border-radius: 4px; }
+.back { display: inline-block; margin-bottom: 1rem; color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+form { display: flex; flex-direction: column; gap: 0.85rem; }
+label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.9rem; }
+input, select, textarea, button {
+  font: inherit;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #0c1018;
+  color: var(--text);
+}
+textarea { min-height: 120px; resize: vertical; }
+button {
+  cursor: pointer;
+  background: var(--accent);
+  border: none;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+button.secondary { background: var(--panel); border: 1px solid var(--border); }
+pre.out {
+  background: var(--panel);
+  padding: 1rem;
+  border-radius: 8px;
+  overflow: auto;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+}
+.err { color: #f87171; }
+.ok { color: var(--accent2); }
+.row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.list { list-style: none; padding: 0; margin: 0; }
+.list li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; gap: 1rem;
+}

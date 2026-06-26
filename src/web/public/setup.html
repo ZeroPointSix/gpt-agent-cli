@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>人类配置 · gpt-agent</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <a class="back" href="/">← 首页</a>
+    <h1>人类配置</h1>
+    <p class="lead">mpt-bench 式逐步配置：编辑 agents 映射并保存 YAML（不收集 token 明文）。</p>
+    <p id="configPath" class="meta"></p>
+    <form id="globalForm">
+      <label>base_url <input name="baseUrl" /></label>
+      <label>token_env <input name="tokenEnv" /></label>
+      <label>default agent <input name="default" /></label>
+      <button type="submit">更新全局并保存</button>
+    </form>
+    <h2 style="margin-top:2rem;font-size:1rem;">Agents</h2>
+    <ul class="list" id="agentList"></ul>
+    <form id="addForm" style="margin-top:1rem;">
+      <h2 style="font-size:1rem;">添加 / 更新</h2>
+      <label>名称 <input name="name" required /></label>
+      <label>id (agtch_...) <input name="id" required /></label>
+      <label>描述 <input name="description" /></label>
+      <label>token_env（可选） <input name="tokenEnv" /></label>
+      <button type="submit">写入并保存</button>
+    </form>
+    <div class="row" style="margin-top:1.5rem;">
+      <button type="button" class="secondary" id="reload">重新加载</button>
+      <button type="button" class="secondary" id="doctor">Doctor（检查环境变量）</button>
+    </div>
+    <pre class="out" id="out"></pre>
+  </main>
+  <script src="/setup.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent 触发 · gpt-agent</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <a class="back" href="/">← 首页</a>
+    <h1>Agent 触发</h1>
+    <p class="lead">参数化选择 agent 并触发（服务端使用进程环境变量中的 token，勿在浏览器填写密钥）。</p>
+    <form id="form">
+      <label>配置文件路径（可选，默认自动发现）
+        <input name="configPath" placeholder="agents.yaml 或绝对路径" />
+      </label>
+      <label>Agent
+        <select name="agent" id="agentSelect" required></select>
+      </label>
+      <label>input（必填）
+        <textarea name="input" required placeholder="传给 workspace agent 的文本"></textarea>
+      </label>
+      <label>conversation_key（可选）
+        <input name="conversationKey" />
+      </label>
+      <label>Idempotency-Key（可选）
+        <input name="idempotencyKey" />
+      </label>
+      <button type="submit">触发 (POST → 202)</button>
+    </form>
+    <pre class="out" id="out"></pre>
+  </main>
+  <script src="/agent.js"></script>
+</body>
+</html>

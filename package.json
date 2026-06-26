@@ -1,0 +1,32 @@
+{
+  "name": "gpt-agent",
+  "version": "0.1.0",
+  "description": "CLI to trigger published ChatGPT workspace agents via the Workspace Agents API",
+  "type": "module",
+  "bin": {
+    "gpt-agent": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node scripts/copy-web.mjs",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
+    "typecheck": "tsc --noEmit",
+    "mock:api": "tsx src/mock-server.ts",
+    "test:mock": "tsx src/mock-smoke.ts",
+    "serve": "tsx src/serve.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.5.0",
+    "commander": "^13.1.0",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "license": "MIT"
+}

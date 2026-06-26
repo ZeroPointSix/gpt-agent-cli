@@ -1,0 +1,9 @@
+token_env: GPT_AGENT_ACCESS_TOKEN
+default: ok
+base_url: http://127.0.0.1:8787
+
+agents:
+  ok:
+    id: agtch_ok_demo
+  bad:
+    id: agtch_missing
