@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
+import { getWorkspaceDir } from "./utils/workspace.js";
 import { loadConfig, resolveAgent, resolveToken } from "./config.js";
 import { WorkspaceAgentsClient } from "./api.js";
 import { resolveInput } from "./input.js";
@@ -15,12 +16,20 @@ function resolveIdempotencyKey(
   return suffix ? `${trimmed}:${suffix}` : trimmed;
 }
 
+getWorkspaceDir();
+
 const program = new Command();
 
 program
   .name("gpt-agent")
   .description(
-    "Trigger published ChatGPT workspace agents (Workspace Agents API)",
+    `触发 ChatGPT Workspace Agents（API 入队 202）
+
+无子命令时进入交互式菜单（设计对齐 npx mpt-bench / mpt）。
+
+  gpt-agent                    交互式菜单（推荐）
+  gpt-agent agent list         管理 agent（对标 mpt channel list）
+  gpt-agent run -m "..."       命令行触发`,
   )
   .option(
     "-c, --config <path>",
@@ -202,24 +211,87 @@ agents:
 
 program.option("--json", "Emit machine-readable JSON on success");
 
-const ui = program.command("ui").description("双界面：终端交互");
+const agentCmd = program.command("agent").description("管理 agent 配置（对标 mpt channel）");
+
+agentCmd
+  .command("list")
+  .description("列出所有 agent")
+  .option("-f, --format <type>", "json")
+  .action(async (opts) => {
+    const { agentList } = await import("./cli/agent-cmd.js");
+    const globalOpts = program.opts<{ config?: string }>();
+    await agentList({ config: globalOpts.config, format: opts.format });
+  });
+
+agentCmd
+  .command("add")
+  .description("添加 agent")
+  .requiredOption("--name <name>", "配置名称")
+  .requiredOption("--id <id>", "agtch_ 通道 ID")
+  .option("--description <text>", "描述")
+  .option("--token-env <env>", "专用 token 环境变量")
+  .action(async (opts) => {
+    const { agentAdd } = await import("./cli/agent-cmd.js");
+    const globalOpts = program.opts<{ config?: string }>();
+    await agentAdd({
+      config: globalOpts.config,
+      name: opts.name,
+      id: opts.id,
+      description: opts.description,
+      tokenEnv: opts.tokenEnv,
+    });
+  });
+
+agentCmd
+  .command("remove")
+  .description("删除 agent")
+  .requiredOption("--name <name>", "配置名称")
+  .action(async (opts) => {
+    const { agentRemove } = await import("./cli/agent-cmd.js");
+    const globalOpts = program.opts<{ config?: string }>();
+    await agentRemove({ config: globalOpts.config, name: opts.name });
+  });
+
+agentCmd
+  .command("enable")
+  .description("启用 agent")
+  .requiredOption("--name <name>", "配置名称")
+  .action(async (opts) => {
+    const { agentSetEnabled } = await import("./cli/agent-cmd.js");
+    const globalOpts = program.opts<{ config?: string }>();
+    await agentSetEnabled({ config: globalOpts.config, name: opts.name }, true);
+  });
+
+agentCmd
+  .command("disable")
+  .description("禁用 agent")
+  .requiredOption("--name <name>", "配置名称")
+  .action(async (opts) => {
+    const { agentSetEnabled } = await import("./cli/agent-cmd.js");
+    const globalOpts = program.opts<{ config?: string }>();
+    await agentSetEnabled({ config: globalOpts.config, name: opts.name }, false);
+  });
+
+const ui = program.command("ui").description("快捷入口（主菜单请直接运行 gpt-agent）");
 
 ui
   .command("invoke")
-  .description("界面 1 — 参数化选择 agent 并触发")
+  .description("等同菜单「1. 一键触发」")
   .action(async () => {
     const globalOpts = program.opts<{ config?: string }>();
-    const { runAgentInvokeTui } = await import("./tui/agent-invoke.js");
-    await runAgentInvokeTui({ configPath: globalOpts.config });
+    const { getConfigPath } = await import("./utils/workspace.js");
+    const { guidedTrigger } = await import("./interactive/index.js");
+    await guidedTrigger(globalOpts.config ?? getConfigPath());
   });
 
 ui
   .command("setup")
-  .description("界面 2 — 人类配置向导（参考 mpt-bench 逐步选型）")
+  .description("等同菜单「3. Agent 管理」")
   .action(async () => {
     const globalOpts = program.opts<{ config?: string }>();
-    const { runHumanSetupTui } = await import("./tui/human-setup.js");
-    await runHumanSetupTui({ configPath: globalOpts.config });
+    const { getConfigPath } = await import("./utils/workspace.js");
+    const { agentManagement } = await import("./interactive/index.js");
+    await agentManagement(globalOpts.config ?? getConfigPath());
   });
 
 program
@@ -258,6 +330,12 @@ program
     }
     process.exitCode = ok ? 0 : 1;
   });
+
+program.action(async () => {
+  const globalOpts = program.opts<{ config?: string }>();
+  const { showMenu } = await import("./interactive/index.js");
+  await showMenu({ config: globalOpts.config });
+});
 
 program.parseAsync(process.argv).catch((err: unknown) => {
   console.error(err instanceof Error ? err.message : err);

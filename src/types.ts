@@ -4,6 +4,8 @@ export type AgentProfile = {
   description?: string;
   /** Env var name holding bearer token; falls back to global token_env */
   tokenEnv?: string;
+  /** 对齐 mpt channel.enabled：参与 batch / 引导默认列表 */
+  enabled?: boolean;
 };
 
 export type AgentsConfig = {

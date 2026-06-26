@@ -15,6 +15,7 @@ export function configToYamlObject(config: AgentsConfig): Record<string, unknown
     const row: Record<string, unknown> = { id: p.id };
     if (p.description) row.description = p.description;
     if (p.tokenEnv) row.token_env = p.tokenEnv;
+    if (p.enabled === false) row.enabled = false;
     agents[name] = row;
   }
   const out: Record<string, unknown> = { agents };

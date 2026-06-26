@@ -3,12 +3,14 @@ import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
 import type { AgentProfile, AgentsConfig } from "./types.js";
+import { getConfigPath, getWorkspaceDir } from "./utils/workspace.js";
 
 const DEFAULT_BASE = "https://api.chatgpt.com";
 const DEFAULT_TOKEN_ENV = "GPT_AGENT_ACCESS_TOKEN";
 
 const CONFIG_CANDIDATES = [
   process.env.GPT_AGENT_CONFIG,
+  getConfigPath(),
   join(process.cwd(), "agents.yaml"),
   join(process.cwd(), "agents.yml"),
   join(process.cwd(), "gpt-agent.yaml"),
@@ -16,6 +18,7 @@ const CONFIG_CANDIDATES = [
 ].filter((p): p is string => Boolean(p));
 
 export async function findConfigPath(explicit?: string): Promise<string | undefined> {
+  getWorkspaceDir();
   if (explicit) {
     const p = resolve(explicit);
     return p;
@@ -45,6 +48,7 @@ function normalizeProfile(raw: Record<string, unknown>): AgentProfile {
         : typeof raw.tokenEnv === "string"
           ? raw.tokenEnv
           : undefined,
+    enabled: raw.enabled === false ? false : true,
   };
 }
 

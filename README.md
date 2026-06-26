@@ -2,6 +2,8 @@
 
 TypeScript 单体 CLI，用于通过 [Workspace Agents API](https://developers.openai.com/workspace-agents/trigger-runs) 触发已发布的 ChatGPT 工作区智能体。
 
+**交互与目录结构对齐本机 `npx mpt-bench`（`mpt`）**：无参数进入 Banner + 数字菜单；配置默认 `~/.gpt-agent/config.yaml`；`gpt-agent agent` 子命令对标 `mpt channel`。
+
 ## 前置条件
 
 - Node.js 20+
@@ -34,12 +36,24 @@ agents:
     id: agtch_your_channel_id
 ```
 
-## 双界面
+## 双界面（对标 mpt 菜单分区）
 
-| 界面 | 用途 | 终端 | Web |
-| --- | --- | --- | --- |
-| **Agent 触发** | 选 agent、填 input / 会话键，入队触发 | `gpt-agent ui invoke` | `gpt-agent serve` → `/agent.html` |
-| **人类配置** | mpt-bench 式逐步配置 `agents.yaml` | `gpt-agent ui setup` | `gpt-agent serve` → `/setup.html` |
+| 分区 | mpt 类比 | gpt-agent |
+| --- | --- | --- |
+| **触发执行** | 一键压测 / 横评 | 菜单 `1` 一键触发、`2` 批量触发 |
+| **配置管理** | 渠道管理 | 菜单 `3` Agent 管理；`gpt-agent agent list/add/...` |
+| **Web** | — | 菜单 `5` 或 `gpt-agent serve` → `/agent.html` + `/setup.html` |
+
+```bash
+npx gpt-agent          # 或 npm run dev — 交互菜单（推荐）
+gpt-agent agent list
+gpt-agent agent add --name demo --id agtch_xxx
+```
+
+| 界面 | 终端快捷 | Web |
+| --- | --- | --- |
+| Agent 触发 | 菜单 `1` 或 `gpt-agent ui invoke` | `/agent.html` |
+| 人类配置 | 菜单 `3` 或 `gpt-agent ui setup` | `/setup.html` |
 
 ```bash
 npm run serve
