@@ -40,7 +40,15 @@ jobs:
         run: npm run build
 
       - name: Run mock smoke tests
-        run: npm run test:mock
+        run: |
+          npm run mock:api &
+          for i in {1..10}; do
+            if curl --silent --fail http://127.0.0.1:8787/health >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          npm run test:mock
         env:
           GPT_AGENT_ACCESS_TOKEN: x
 
