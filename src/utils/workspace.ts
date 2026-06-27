@@ -10,7 +10,7 @@ let initialized = false;
 export function getWorkspaceDir(): string {
   if (!initialized && !existsSync(GPT_AGENT_HOME)) {
     mkdirSync(join(GPT_AGENT_HOME, "logs"), { recursive: true });
-    console.log(`已创建 gpt-agent 工作目录: ${GPT_AGENT_HOME}\n`);
+    console.error(`已创建 gpt-agent 工作目录: ${GPT_AGENT_HOME}\n`);
   }
   initialized = true;
   return GPT_AGENT_HOME;

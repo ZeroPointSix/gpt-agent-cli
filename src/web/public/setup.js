@@ -14,11 +14,48 @@ function render() {
   const ul = document.getElementById("agentList");
   ul.innerHTML = "";
   for (const [n, a] of Object.entries(c.agents || {}).sort()) {
+    const enabled = a.enabled !== false;
     const li = document.createElement("li");
-    li.innerHTML = `<span><strong>${n}</strong> ${a.id}</span>
-      <button type="button" data-del="${n}" class="secondary" style="margin:0;padding:0.25rem 0.5rem;">删除</button>`;
+    li.className = enabled ? "agent-row" : "agent-row muted-row";
+
+    const main = document.createElement("span");
+    main.className = "agent-main";
+    const title = document.createElement("strong");
+    title.textContent = n;
+    const id = document.createElement("span");
+    id.className = "agent-id";
+    id.textContent = a.id;
+    const status = document.createElement("span");
+    status.className = enabled ? "pill" : "pill off";
+    status.textContent = enabled ? "启用" : "禁用";
+    main.append(title, document.createTextNode(" "), id, status);
+
+    const actions = document.createElement("span");
+    actions.className = "actions";
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "secondary compact";
+    toggle.dataset.toggle = n;
+    toggle.textContent = enabled ? "禁用" : "启用";
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "secondary compact";
+    remove.dataset.del = n;
+    remove.textContent = "删除";
+    actions.append(toggle, remove);
+    li.append(main, actions);
     ul.appendChild(li);
   }
+  ul.querySelectorAll("[data-toggle]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const name = btn.getAttribute("data-toggle");
+      const profile = name ? state.config.agents[name] : null;
+      if (!name || !profile) return;
+      const config = { ...state.config, agents: { ...state.config.agents } };
+      config.agents[name] = { ...profile, enabled: profile.enabled === false };
+      await apiSave({ config });
+    });
+  });
   ul.querySelectorAll("[data-del]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const name = btn.getAttribute("data-del");
@@ -66,6 +103,7 @@ document.getElementById("addForm").addEventListener("submit", async (e) => {
     id: fd.get("id")?.toString().trim(),
     description: fd.get("description")?.toString().trim() || undefined,
     tokenEnv: fd.get("tokenEnv")?.toString().trim() || undefined,
+    enabled: fd.get("enabled") === "on",
   };
   await apiSave({ config });
   e.target.reset();
