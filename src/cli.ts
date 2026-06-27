@@ -1,20 +1,8 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { getWorkspaceDir } from "./utils/workspace.js";
-import { loadConfig, resolveAgent, resolveToken } from "./config.js";
-import { WorkspaceAgentsClient } from "./api.js";
-import { resolveInput } from "./input.js";
-import type { TriggerOptions } from "./types.js";
-
-function resolveIdempotencyKey(
-  explicit?: string,
-  suffix?: string,
-): string | undefined {
-  const base = explicit ?? process.env.GPT_AGENT_IDEMPOTENCY_KEY;
-  if (!base?.trim()) return undefined;
-  const trimmed = base.trim();
-  return suffix ? `${trimmed}:${suffix}` : trimmed;
-}
+import { loadConfig } from "./config.js";
+import { runBatchTrigger, runTrigger } from "./trigger-service.js";
 
 getWorkspaceDir();
 
@@ -67,29 +55,18 @@ const triggerAction = async (
     idempotencyKey?: string;
   },
 ) => {
-  const globalOpts = program.opts<{ config?: string }>();
-  const { config } = await loadConfig(globalOpts.config);
-  const { name, profile } = resolveAgent(config, agentArg);
-  const token = resolveToken(config, profile);
-  const input = await resolveInput({
+  const globalOpts = program.opts<{ config?: string; json?: boolean }>();
+  const result = await runTrigger({
+    configPath: globalOpts.config,
+    agentName: agentArg,
     message: opts.message,
     file: opts.file,
     stdin: opts.stdin,
+    conversationKey: opts.conversationKey,
+    idempotencyKey: opts.idempotencyKey,
   });
 
-  const triggerOpts: TriggerOptions = {
-    input,
-    conversationKey: opts.conversationKey,
-    idempotencyKey: resolveIdempotencyKey(opts.idempotencyKey),
-  };
-
-  const client = new WorkspaceAgentsClient(
-    config.baseUrl ?? "https://api.chatgpt.com",
-    token,
-  );
-  const result = await client.trigger(profile.id, name, triggerOpts);
-
-  if (program.opts<{ json?: boolean }>().json) {
+  if (globalOpts.json) {
     console.log(JSON.stringify(result, null, 2));
   } else {
     console.log(
@@ -143,40 +120,15 @@ program
   )
   .action(async (agentNames: string[], opts) => {
     const globalOpts = program.opts<{ config?: string; json?: boolean }>();
-    const { config } = await loadConfig(globalOpts.config);
-    const input = await resolveInput({
+    const results = await runBatchTrigger({
+      configPath: globalOpts.config,
+      agentNames,
       message: opts.message,
       file: opts.file,
       stdin: opts.stdin,
+      conversationKeyPrefix: opts.conversationKey,
+      idempotencyKey: opts.idempotencyKey,
     });
-
-    const results = [];
-    for (const agentName of agentNames) {
-      const { name, profile } = resolveAgent(config, agentName);
-      const token = resolveToken(config, profile);
-      const client = new WorkspaceAgentsClient(
-        config.baseUrl ?? "https://api.chatgpt.com",
-        token,
-      );
-      const conversationKey = opts.conversationKey
-        ? `${opts.conversationKey}:${name}`
-        : undefined;
-      try {
-        const result = await client.trigger(profile.id, name, {
-          input,
-          conversationKey,
-          idempotencyKey: resolveIdempotencyKey(opts.idempotencyKey, name),
-        });
-        results.push({ ok: true, ...result });
-      } catch (e) {
-        results.push({
-          ok: false,
-          agentName: name,
-          agentId: profile.id,
-          error: e instanceof Error ? e.message : String(e),
-        });
-      }
-    }
 
     if (globalOpts.json) {
       console.log(JSON.stringify(results, null, 2));

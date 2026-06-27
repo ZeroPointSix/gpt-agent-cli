@@ -1,6 +1,6 @@
 {
   "name": "gpt-agent",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI to trigger published ChatGPT workspace agents via the Workspace Agents API",
   "type": "module",
   "bin": {

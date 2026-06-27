@@ -5,24 +5,45 @@ async function loadAgents() {
   const data = await res.json();
   const sel = document.getElementById("agentSelect");
   sel.innerHTML = "";
-  const names = Object.keys(data.config?.agents || {}).sort();
-  if (!names.length) {
+  const entries = Object.entries(data.config?.agents || {}).sort(([a], [b]) =>
+    a.localeCompare(b),
+  );
+  const showDisabled = document.getElementById("showDisabled")?.checked ?? false;
+  const visible = showDisabled
+    ? entries
+    : entries.filter(([, agent]) => agent.enabled !== false);
+  if (!entries.length) {
     sel.innerHTML = '<option value="">(无 agent — 请先在配置页添加)</option>';
     return;
   }
-  for (const n of names) {
+  if (!visible.length) {
+    sel.innerHTML =
+      '<option value="">(没有启用 agent — 可勾选显示禁用项查看)</option>';
+    return;
+  }
+  for (const [n, agent] of visible) {
+    const enabled = agent.enabled !== false;
     const opt = document.createElement("option");
     opt.value = n;
-    opt.textContent =
-      n === data.config.default ? `${n} (默认)` : n;
+    opt.disabled = !enabled;
+    const suffixes = [];
+    if (n === data.config.default) suffixes.push("默认");
+    if (!enabled) suffixes.push("禁用");
+    opt.textContent = suffixes.length ? `${n} (${suffixes.join(" / ")})` : n;
     sel.appendChild(opt);
   }
-  if (data.config.default && names.includes(data.config.default)) {
+  const enabledNames = visible
+    .filter(([, agent]) => agent.enabled !== false)
+    .map(([name]) => name);
+  if (data.config.default && enabledNames.includes(data.config.default)) {
     sel.value = data.config.default;
+  } else if (enabledNames.length) {
+    sel.value = enabledNames[0];
   }
 }
 
 document.querySelector('[name=configPath]')?.addEventListener("change", loadAgents);
+document.getElementById("showDisabled")?.addEventListener("change", loadAgents);
 loadAgents();
 
 document.getElementById("form").addEventListener("submit", async (e) => {

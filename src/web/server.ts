@@ -10,6 +10,7 @@ import {
   saveConfig,
 } from "../config-io.js";
 import { runTrigger } from "../trigger-service.js";
+import { TriggerApiError } from "../api.js";
 import type { AgentsConfig } from "../types.js";
 
 const MIME: Record<string, string> = {
@@ -46,6 +47,38 @@ function json(res: import("node:http").ServerResponse, status: number, data: unk
 let memoryConfig: { path?: string; config: AgentsConfig } = {
   config: emptyConfig(),
 };
+
+function triggerErrorStatus(e: unknown): number {
+  if (e instanceof TriggerApiError) {
+    return e.status >= 400 && e.status <= 599 ? e.status : 500;
+  }
+  const message = e instanceof Error ? e.message : String(e);
+  const code =
+    typeof e === "object" && e !== null && "code" in e
+      ? String((e as { code?: unknown }).code)
+      : undefined;
+  if (
+    code === "ENOENT" ||
+    /^(Missing access token|Agent name required|Unknown agent|Invalid config|Config must contain|Each agent|Agent ".+" must be)/.test(
+      message,
+    )
+  ) {
+    return 400;
+  }
+  return 500;
+}
+
+function triggerErrorBody(e: unknown): Record<string, unknown> {
+  const body: Record<string, unknown> = {
+    error: e instanceof Error ? e.message : String(e),
+  };
+  if (e instanceof TriggerApiError) {
+    body.status = e.status;
+    body.agentName = e.agentName;
+    body.agentId = e.agentId;
+  }
+  return body;
+}
 
 export async function startWebServer(port = 3847): Promise<void> {
   const root = publicDir();
@@ -130,9 +163,7 @@ export async function startWebServer(port = 3847): Promise<void> {
           });
           return json(res, 202, result);
         } catch (e) {
-          return json(res, 500, {
-            error: e instanceof Error ? e.message : String(e),
-          });
+          return json(res, triggerErrorStatus(e), triggerErrorBody(e));
         }
       }
 
